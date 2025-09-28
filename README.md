@@ -1,6 +1,6 @@
 ---
-title: Iris Gradio Demo
-emoji: 🌸
+title: Breast Cancer Classification
+emoji: 🤱
 colorFrom: indigo
 colorTo: blue
 sdk: gradio
