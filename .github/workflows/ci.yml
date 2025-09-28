@@ -47,5 +47,5 @@ jobs:
           # Use the HF_TOKEN secret you created in GitHub
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Push the code to your specific Hugging Face Space
-          git push https://Melland1375:$HF_TOKEN@huggingface.co/spaces/Melland1375/project main
+          # Use --force to overwrite the remote repository
+          git push --force https://Melland1375:$HF_TOKEN@huggingface.co/spaces/Melland1375/project main
