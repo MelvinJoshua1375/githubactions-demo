@@ -1,64 +1,67 @@
 import gradio as gr
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_breast_cancer
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 
 # Load dataset
-iris = load_iris()
-X = pd.DataFrame(iris.data, columns=iris.feature_names)
-y = iris.target
+data = load_breast_cancer()
+X = pd.DataFrame(data.data, columns=data.feature_names)
+y = data.target
 
 # Train model
-clf = RandomForestClassifier()
+clf = RandomForestClassifier(random_state=42)
 clf.fit(X, y)
 
-# Prediction function
-def predict(sepal_length, sepal_width, petal_length, petal_width):
-    data = [[sepal_length, sepal_width, petal_length, petal_width]]
-    pred_class = clf.predict(data)[0]
-    pred_proba = clf.predict_proba(data)[0]
-    result = iris.target_names[pred_class]
-    
-    # Probability bar chart
+# Prediction function (takes 30 features as inputs)
+def predict(*features):
+    data_input = [list(features)]
+    pred_class = clf.predict(data_input)[0]
+    pred_proba = clf.predict_proba(data_input)[0]
+    result = data.target_names[pred_class]
+
     proba_df = pd.DataFrame({
-        "Class": iris.target_names,
+        "Class": data.target_names,
         "Probability": pred_proba
     })
 
     return result, proba_df
 
-# Define the interface
+# Create sliders dynamically for all 30 features
+sliders = []
+for feature_name in X.columns:
+    col_min = float(X[feature_name].min())
+    col_max = float(X[feature_name].max())
+    step = (col_max - col_min) / 100  # reasonable step size
+    sliders.append(gr.Slider(minimum=col_min, maximum=col_max, value=(col_min + col_max)/2, step=step, label=feature_name))
+
+# Example input - use the first data point as example
+example = list(X.iloc[0])
+
 with gr.Blocks(theme=gr.themes.Soft()) as demo:
-    gr.Markdown("## 🌸 Iris Flower Classifier")
+    gr.Markdown("## 🦠 Breast Cancer Classifier 🦠")
     gr.Markdown(
-        "This model classifies iris flowers into one of three species: **setosa**, **versicolor**, or **virginica**, "
-        "based on measurements of their sepals and petals."
+        "This model predicts whether a tumor is **malignant** or **benign** based on 30 features "
+        "computed from a digitized image of a fine needle aspirate (FNA) of a breast mass."
     )
     
     with gr.Row():
-        with gr.Column():
-            sepal_length = gr.Slider(4.0, 8.0, step=0.1, label="Sepal Length (cm)")
-            sepal_width = gr.Slider(2.0, 5.0, step=0.1, label="Sepal Width (cm)")
-            petal_length = gr.Slider(1.0, 7.0, step=0.1, label="Petal Length (cm)")
-            petal_width = gr.Slider(0.1, 2.5, step=0.1, label="Petal Width (cm)")
-            btn = gr.Button("Classify 🌺")
-        with gr.Column():
-            label = gr.Textbox(label="Predicted Species", interactive=False)
+        with gr.Column(scale=2, min_width=600):
+            for slider in sliders:
+                slider.render()
+            btn = gr.Button("Classify 🩺")
+        with gr.Column(scale=1, min_width=400):
+            label = gr.Textbox(label="Predicted Tumor Type", interactive=False)
             chart = gr.BarPlot(label="Class Probabilities", x="Class", y="Probability", width=400, height=300)
 
     btn.click(
         fn=predict,
-        inputs=[sepal_length, sepal_width, petal_length, petal_width],
+        inputs=sliders,
         outputs=[label, chart]
     )
 
     gr.Examples(
-        examples=[
-            [5.1, 3.5, 1.4, 0.2],
-            [6.0, 2.2, 4.0, 1.0],
-            [6.9, 3.1, 5.4, 2.1]
-        ],
-        inputs=[sepal_length, sepal_width, petal_length, petal_width]
+        examples=[example],
+        inputs=sliders
     )
 
 demo.launch()
