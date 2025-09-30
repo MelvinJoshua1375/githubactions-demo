@@ -38,7 +38,7 @@ for feature_name in X.columns:
 example = list(X.iloc[0])
 
 with gr.Blocks(theme=gr.themes.Soft()) as demo:
-    gr.Markdown("## 🦠 Breast Cancer Classifier 🦠")
+    gr.Markdown("## 🦠 Hello Guys!! 🦠")
     gr.Markdown(
         "This model predicts whether a tumor is **malignant** or **benign** based on 30 features "
         "computed from a digitized image of a fine needle aspirate (FNA) of a breast mass."
@@ -65,3 +65,4 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
     )
 
 demo.launch()
+
